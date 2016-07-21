@@ -1,13 +1,13 @@
 package app
 
+import cats.free.Free
 import cats.std.vector._
 import cats.syntax.traverse._
-import demo.AppAction.AppActionMonadic
-import demo.ConfigAction._
-import demo.SocialNetworkAction._
-import demo.{ConfigActionInterpreter, SocialNetworkActionInterpreter, TaskInterpreter}
+import demo.Effects.C._
+import demo.Effects.S._
+import demo.Effects.{AppAction, AppActionMonadic}
+import demo.TaskInterpreter
 import model.{Handle, Tweet}
-import monix.reactive.MulticastStrategy.Async
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -16,10 +16,9 @@ object Main {
   implicit val scheduler = monix.execution.Scheduler.fixedPool("appThreadPool", 10)
 
   def main(args: Array[String]): Unit = {
-    val program = findMostInfluentialAccount()
-    val interpreter = new TaskInterpreter(new SocialNetworkActionInterpreter(), new ConfigActionInterpreter())
-    val task = interpreter.run(program)
-    println(Await.result(task.runAsync, 1 minute))
+    val program: Free[AppAction, String] = findMostInfluentialAccount()
+    val task = TaskInterpreter.run(program)
+    println(Await.result(task.runAsync, 1.minute))
   }
 
   def findMostInfluentialAccount() = {
