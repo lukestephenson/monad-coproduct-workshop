@@ -79,10 +79,10 @@ object Main {
   }
 
   def getUserMostRecentTweet(users: Vector[Handle]): AppActionMonadic[Vector[(Handle, Tweet)]] = {
-    val result: Vector[AppActionApplicative[(Handle, Tweet)]] = users.map { handle =>
+    val result: AppActionApplicative[Vector[(Handle, Tweet)]] = users.traverse[AppActionApplicative, (Handle, Tweet)] { handle =>
       val followerRecentTweet: AppActionApplicative[Tweet] = getMostRecentTweetA(handle)
       followerRecentTweet.map(tweet => (handle, tweet))
     }
-    noAction(result.sequence)
+    noAction(result)
   }
 }
