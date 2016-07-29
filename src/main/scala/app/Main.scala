@@ -47,18 +47,6 @@ object Main {
     println(s"Took $total ms to complete")
   }
 
-  // Failed attempt (Applicative[Monad[Applicative]])
-//  def findMostInfluentialAccount(): AppActionMonadic[String] = {
-//    val baseUrl: AppActionApplicative[String] = FreeApplicative.pure("http://baseurl")
-//    val lukeFollowers: AppActionApplicative[Int] = getFollowersWithRecentTweets(lukeHandle)
-//    val composeFpFollowers: AppActionApplicative[Int] = getFollowersWithRecentTweets(composeHandle)
-//
-//    val applicativeResult: AppActionApplicative[String] = (baseUrl |@| lukeFollowers |@| composeFpFollowers).map(combine)
-//
-//    noAction(applicativeResult)
-//  }
-
-
   def findMostInfluentialAccount(): AppActionMonadic[String] = {
     for {
       baseUrl <- noAction("http://baseurl")
@@ -73,8 +61,8 @@ object Main {
       tweet.timestamp > System.currentTimeMillis() - 7.days.toMillis
     }.map(_._1)
 
-    val firstActiveFollowerCount = followers.lukeFollowers.filter(follower => followersWithTweetInLastWeek.contains(follower)).size
-    val secondActiveFollowerCount = followers.composeFollowers.filter(follower => followersWithTweetInLastWeek.contains(follower)).size
+    val firstActiveFollowerCount = followers.lukeFollowers.count(follower => followersWithTweetInLastWeek.contains(follower))
+    val secondActiveFollowerCount = followers.composeFollowers.count(follower => followersWithTweetInLastWeek.contains(follower))
 
     val mostActive = if (firstActiveFollowerCount > secondActiveFollowerCount) lukeHandle else composeHandle
     mostActive.handle
@@ -90,33 +78,10 @@ object Main {
     noAction(applicativeResult)
   }
 
-//  def combine(lukeFollowers: Int, composeFpFollowers: Int): String = {
-//    val mostActive = if (lukeFollowers > composeFpFollowers) lukeHandle else composeHandle
-//    s"$baseUrl/details/${mostActive.handle}"
-//  }
-/*
-  def findMostInfluentialAccount() = {
-    val lukeHandle = Handle("lukestephenson")
-    val composeHandle = Handle("compose")
-    for {
-      baseUrl <- getConfigM("appUrl")
-      lukeFollowers <- getFollowersWithRecentTweets(lukeHandle)
-      composeFpFollowers <- getFollowersWithRecentTweets(composeHandle)
-      mostActive = if (lukeFollowers > composeFpFollowers) lukeHandle else composeHandle
-    } yield s"$baseUrl/details/${mostActive.handle}"
-  }
-*/
   def getUserMostRecentTweet(users: Vector[Handle]): AppActionMonadic[Vector[(Handle, Tweet)]] = {
     val result: Vector[AppActionApplicative[(Handle, Tweet)]] = users.map { handle =>
       val followerRecentTweet: AppActionApplicative[Tweet] = getMostRecentTweetA(handle)
       followerRecentTweet.map(tweet => (handle, tweet))
-//      val m: AppActionApplicative[Vector[Tweet]] = followerRecentTweet.sequence
-//      m.map { followerTweets =>
-//        // TODO consider the time
-//        followerTweets
-//          .filter(_.timestamp > System.currentTimeMillis() - 7.days.toMillis)
-//          .size
-//      }
     }
     noAction(result.sequence)
   }
