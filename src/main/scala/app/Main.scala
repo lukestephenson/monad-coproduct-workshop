@@ -1,23 +1,11 @@
 package app
 
-import java.lang.reflect.Executable
-
-import cats._
-import cats.`~>`
-import cats.data.Coproduct
-import cats.free.FreeApplicative.FA
-import cats.std.future._
-import cats.std.list._
-import cats.std.set._
+import cats.std.vector._
 import cats.syntax.cartesian._
 import cats.syntax.traverse._
-import cats.free.{Free, FreeApplicative}
-import cats.std.vector._
-import cats.syntax.traverse._
-import demo.Effects.C._
 import demo.Effects.S._
-import demo.Effects.{AppAction, AppActionApplicative, AppActionMonadic, noAction}
-import demo.{Effects, SocialNetworkAction, TaskInterpreter}
+import demo.Effects.{AppActionApplicative, AppActionMonadic, noAction}
+import demo.TaskInterpreter
 import model.{Handle, Tweet}
 
 import scala.concurrent.Await
