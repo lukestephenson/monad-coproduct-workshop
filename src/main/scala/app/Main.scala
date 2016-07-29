@@ -19,12 +19,10 @@ object Main {
   val lukeHandle = Handle("lukestephenson")
   val composeHandle = Handle("compose")
 
-  def main(args: Array[String]): Unit = {
-    timed {
-      val program = findMostInfluentialAccount()
-      val task = TaskInterpreter.run(program)
-      println(Await.result(task.runAsync, 1.minute))
-    }
+  def main(args: Array[String]): Unit = timed {
+    val program = findMostInfluentialAccount()
+    val task = TaskInterpreter.run(program)
+    println(Await.result(task.runAsync, 1.minute))
   }
 
   def timed(executable: => Unit): Unit = {

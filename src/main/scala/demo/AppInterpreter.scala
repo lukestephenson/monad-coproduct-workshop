@@ -1,11 +1,11 @@
 package demo
 
 import cats._
-import cats.data.Coproduct
-import demo.Effects.{AppAction, AppActionApplicative, AppActionMonadic}
+import demo.Effects.{AppActionApplicative, AppActionMonadic}
 import model.{Handle, Tweet}
 import monix.cats._
 import monix.eval.Task
+
 import scala.concurrent.duration._
 
 object TaskInterpreter {
