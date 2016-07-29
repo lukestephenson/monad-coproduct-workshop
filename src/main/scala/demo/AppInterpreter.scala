@@ -1,27 +1,31 @@
 package demo
 
 import cats._
-import demo.Effects.{AppAction, AppActionMonadic}
+import cats.data.Coproduct
+import demo.Effects.{AppAction, AppActionApplicative, AppActionMonadic}
 import model.{Handle, Tweet}
 import monix.cats._
 import monix.eval.Task
+import scala.concurrent.duration._
 
-abstract class AppInterpreter[F[_] : Monad] {
-  def interpret: (AppAction ~> F)
-
-  def run[A](script: AppActionMonadic[A]): F[A] = script.foldMap(interpret)
-}
-
-object TaskInterpreter extends AppInterpreter[Task] {
+object TaskInterpreter {
   implicitly[Monad[Task]]
 
-  val interpret: AppAction ~> Task = SocialNetworkActionInterpreter or ConfigActionInterpreter
+  val interpret = SocialNetworkActionInterpreter or AppActionApplicativeInterpreter
+
+  def run[A](script: AppActionMonadic[A]): Task[A] = script.foldMap(interpret)
+}
+
+object AppActionApplicativeInterpreter extends (AppActionApplicative ~> Task) {
+  override def apply[A](fa: AppActionApplicative[A]): Task[A] = {
+    fa.foldMap(SocialNetworkActionInterpreter)(TaskApplicativeInstance.TaskApplicative)
+  }
 }
 
 object SocialNetworkActionInterpreter extends (SocialNetworkAction ~> Task) {
   def apply[A](action: SocialNetworkAction[A]): Task[A] = action match {
-    case GetFollowers(handle) => Task.now(Vector(Handle("abc")))
-    case GetMostRecentTweet(handle) => Task.now(Tweet("hello world", System.currentTimeMillis()))
+    case GetFollowers(handle) => Task.now(Vector(Handle("abc"), Handle("xyz"), Handle("123"))).delayResult(1.second)
+    case GetMostRecentTweet(handle) => Task.now(Tweet("hello world", System.currentTimeMillis())).delayResult(1.second)
   }
 }
 

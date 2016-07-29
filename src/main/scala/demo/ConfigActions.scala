@@ -1,26 +1,40 @@
 package demo
 
 import cats.data.Coproduct
-import cats.free.{Free, Inject}
+import cats.free.{Free, FreeApplicative, Inject}
+import demo.Effects.AppActionApplicative
 import model.{Handle, Tweet}
+
+object Effects {
+  type AppAction[A] = Coproduct[SocialNetworkAction, ConfigAction, A]
+  type AppActionApplicative[A] = FreeApplicative[SocialNetworkAction, A]
+  type AppActionMonadic[A] = Free[Coproduct[SocialNetworkAction,AppActionApplicative,?], A]
+
+  val S = implicitly[SocialNetworkActions[AppAction]]
+  val C = implicitly[ConfigActions[AppAction]]
+
+  def noAction[A](a: A): AppActionMonadic[A] =
+    Free.pure[Coproduct[SocialNetworkAction,AppActionApplicative,?],A](a)
+
+  def noAction[A](p: AppActionApplicative[A]): AppActionMonadic[A] =
+    Free.liftF[Coproduct[SocialNetworkAction,AppActionApplicative,?],A](Coproduct.right(p))
+}
 
 sealed trait SocialNetworkAction[A]
 case class GetFollowers(handle: Handle) extends SocialNetworkAction[Vector[Handle]]
 case class GetMostRecentTweet(handle: Handle) extends SocialNetworkAction[Tweet]
 
-object Effects {
-  type AppAction[A] = Coproduct[SocialNetworkAction, ConfigAction, A]
-  type AppActionMonadic[A] = Free[AppAction, A]
-
-  val S = implicitly[SocialNetworkActions[AppAction]]
-  val C = implicitly[ConfigActions[AppAction]]
-}
-
 class SocialNetworkActions[F[_]](implicit I: Inject[SocialNetworkAction, F]) {
-  def getFollowers(handle: Handle): Free[F, Vector[Handle]] =
+  def getFollowersA(handle: Handle): AppActionApplicative[Vector[Handle]] =
+    FreeApplicative.lift[SocialNetworkAction, Vector[Handle]](GetFollowers(handle))
+
+  def getFollowersM(handle: Handle): Free[F, Vector[Handle]] =
     Free.inject[SocialNetworkAction, F](GetFollowers(handle))
 
-  def getMostRecentTweet(handle: Handle): Free[F, Tweet] =
+  def getMostRecentTweetA(handle: Handle): AppActionApplicative[Tweet] =
+    FreeApplicative.lift[SocialNetworkAction, Tweet](GetMostRecentTweet(handle))
+
+  def getMostRecentTweetM(handle: Handle): Free[F, Tweet] =
     Free.inject[SocialNetworkAction, F](GetMostRecentTweet(handle))
 }
 
@@ -32,7 +46,7 @@ sealed trait ConfigAction[A]
 case class GetConfig(key: String) extends ConfigAction[String]
 
 class ConfigActions[F[_]](implicit I: Inject[ConfigAction, F]) {
-  def getConfig(key: String) = Free.inject[ConfigAction, F](GetConfig(key))
+  def getConfigM(key: String): Free[F, String] = Free.inject[ConfigAction, F](GetConfig(key))
 }
 
 object ConfigActions {
