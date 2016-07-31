@@ -8,16 +8,18 @@ import model.{Handle, Tweet}
 object Effects {
   type AppAction[A] = Coproduct[SocialNetworkAction, ConfigAction, A]
   type AppActionApplicative[A] = FreeApplicative[SocialNetworkAction, A]
-  type AppActionMonadic[A] = Free[Coproduct[SocialNetworkAction,AppActionApplicative,?], A]
+
+  type CP[B] = Coproduct[SocialNetworkAction, AppActionApplicative, B]
+  type AppActionMonadic[A] = Free[CP, A]
 
   val S = implicitly[SocialNetworkActions[AppAction]]
   val C = implicitly[ConfigActions[AppAction]]
 
   def noAction[A](a: A): AppActionMonadic[A] =
-    Free.pure[Coproduct[SocialNetworkAction,AppActionApplicative,?],A](a)
+    Free.pure[CP, A](a)
 
   def noAction[A](p: AppActionApplicative[A]): AppActionMonadic[A] =
-    Free.liftF[Coproduct[SocialNetworkAction,AppActionApplicative,?],A](Coproduct.right(p))
+    Free.liftF[CP, A](Coproduct.right(p))
 }
 
 sealed trait SocialNetworkAction[A]

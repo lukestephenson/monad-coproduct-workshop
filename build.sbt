@@ -14,10 +14,6 @@ libraryDependencies ++= Seq(
   "io.monix" %% "monix-cats" % monixVersion
 )
 
-resolvers += Resolver.sonatypeRepo("releases")
-
-addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.7.1")
-
 scalacOptions ++= Seq(
   "-feature",
   "-language:higherKinds",
