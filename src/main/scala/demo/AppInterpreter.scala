@@ -9,6 +9,8 @@ import monix.eval.Task
 import scala.concurrent.duration._
 
 object TaskInterpreter {
+  import monix.cats._
+  import monix.eval.Task.nondeterminism
   implicitly[Monad[Task]]
 
   val interpret = SocialNetworkActionInterpreter or AppActionApplicativeInterpreter
@@ -18,7 +20,9 @@ object TaskInterpreter {
 
 object AppActionApplicativeInterpreter extends (AppActionApplicative ~> Task) {
   override def apply[A](fa: AppActionApplicative[A]): Task[A] = {
-    fa.foldMap(SocialNetworkActionInterpreter)(TaskApplicativeInstance.TaskApplicative)
+    import monix.eval.Task.nondeterminism
+    val taskApplicative = implicitly(Applicative[Task])
+    fa.foldMap(SocialNetworkActionInterpreter)(taskApplicative)
   }
 }
 

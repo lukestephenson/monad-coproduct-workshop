@@ -1,18 +1,26 @@
 package app
 
+import cats.free.Free
+import cats.free.FreeApplicative.FA
 import cats.std.vector._
 import cats.syntax.cartesian._
 import cats.syntax.traverse._
 import demo.Effects.S._
-import demo.Effects.{AppActionApplicative, AppActionMonadic, noAction}
-import demo.TaskInterpreter
+import demo.Effects.{AppActionApplicative, AppActionMonadic, CP, noAction}
+import demo.{SocialNetworkAction, TaskInterpreter}
 import model.{Handle, Tweet}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-case class Followers(lukeFollowers: Vector[Handle], composeFollowers: Vector[Handle])
 
+
+/**
+  * Given two Twitter accounts, determine which one has the most followers
+  * who have tweeted in the last week.  Then return a url in the form
+  * `http://<app-url>/details/<twitter-handle>`.  Note that this endpoint
+  * does not exist, but assume later we might develop one.
+  */
 object Main {
   implicit val scheduler = monix.execution.Scheduler.fixedPool("appThreadPool", 10)
 
@@ -36,39 +44,8 @@ object Main {
   def findMostInfluentialAccount(): AppActionMonadic[String] = {
     for {
       baseUrl <- noAction("http://baseurl")
-      followers <- findFollowers()
-      followerMostRecentTweets <- getUserMostRecentTweet(followers.lukeFollowers ++ followers.composeFollowers)
-      mostActive = calculateMostActiveAccount(followers, followerMostRecentTweets)
+      mostActive <- Example2.findMostInfluentialAccount(lukeHandle, composeHandle)
     } yield s"$baseUrl/details/$mostActive"
   }
 
-  def calculateMostActiveAccount(followers: Followers, followerMostRecentTweets: Vector[(Handle, Tweet)]) = {
-    val followersWithTweetInLastWeek = followerMostRecentTweets.filter { case (_, tweet) =>
-      tweet.timestamp > System.currentTimeMillis() - 7.days.toMillis
-    }.map(_._1)
-
-    val firstActiveFollowerCount = followers.lukeFollowers.count(follower => followersWithTweetInLastWeek.contains(follower))
-    val secondActiveFollowerCount = followers.composeFollowers.count(follower => followersWithTweetInLastWeek.contains(follower))
-
-    val mostActive = if (firstActiveFollowerCount > secondActiveFollowerCount) lukeHandle else composeHandle
-    mostActive.handle
-  }
-
-
-  def findFollowers(): AppActionMonadic[Followers] = {
-    val lukeFollowers = getFollowersA(lukeHandle)
-    val composeFpFollowers = getFollowersA(composeHandle)
-
-    val applicativeResult: AppActionApplicative[Followers] = (lukeFollowers |@| composeFpFollowers).map(Followers)
-
-    noAction(applicativeResult)
-  }
-
-  def getUserMostRecentTweet(users: Vector[Handle]): AppActionMonadic[Vector[(Handle, Tweet)]] = {
-    val result: AppActionApplicative[Vector[(Handle, Tweet)]] = users.traverse[AppActionApplicative, (Handle, Tweet)] { handle =>
-      val followerRecentTweet: AppActionApplicative[Tweet] = getMostRecentTweetA(handle)
-      followerRecentTweet.map(tweet => (handle, tweet))
-    }
-    noAction(result)
-  }
 }
