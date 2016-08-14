@@ -1,9 +1,8 @@
 package app
 
+import cats.Apply
 import demo.Effects._
 import model.{Handle, Tweet}
-
-
 import demo.Effects._
 import model.Handle
 import cats.free.Free
@@ -24,18 +23,21 @@ object Example2 {
     val handle1ActiveFollowers = getFollowersA(handle1).map(getUsersActiveTweetCount)
     val handle2ActiveFollowers = getFollowersA(handle2).map(getUsersActiveTweetCount)
 
-    val applicativeResult: AppActionApplicative[AppActionMonadic[Handle]] =
-      (handle1ActiveFollowers |@| handle2ActiveFollowers).map(foo(handle1, handle2))
+    def determineMostActive(handle1Script: AppActionMonadic[Int], handle2Script: AppActionMonadic[Int]): AppActionMonadic[Handle] = {
+      for {
+        handle1Active <- handle1Script
+        handle2Active <- handle2Script
+        mostActive = if (handle1Active > handle2Active) handle1 else handle2
+      } yield mostActive
+    }
+
+    val applicativeResult = Apply[AppActionApplicative].map2(handle1ActiveFollowers, handle2ActiveFollowers)(determineMostActive)
+
+    // equivalent (but intellij reports as an error
+//    val applicativeResult: AppActionApplicative[AppActionMonadic[Handle]] =
+//      (handle1ActiveFollowers |@| handle2ActiveFollowers).map(determineMostActive)
 
     noAction(applicativeResult).flatMap(m => m)
-  }
-
-  def foo(handle1: Handle, handle2: Handle)(handle1Script: AppActionMonadic[Int], handle2Script: AppActionMonadic[Int]): AppActionMonadic[Handle] = {
-    for {
-      handle1Active <- handle1Script
-      handle2Active <- handle2Script
-      mostActive = if (handle1Active > handle2Active) handle1 else handle2
-    } yield mostActive
   }
 
   def getUsersActiveTweetCount(users: Vector[Handle]): AppActionMonadic[Int] = {
