@@ -32,9 +32,3 @@ object SocialNetworkActionInterpreter extends (SocialNetworkAction ~> Task) {
     case GetMostRecentTweet(handle) => Task.now(Tweet("hello world", System.currentTimeMillis())).delayResult(1.second)
   }
 }
-
-object ConfigActionInterpreter extends (ConfigAction ~> Task) {
-  def apply[A](action: ConfigAction[A]): Task[A] = action match {
-    case GetConfig(_) => Task.now("http://localhost:9999/")
-  }
-}
