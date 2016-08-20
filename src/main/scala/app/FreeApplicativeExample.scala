@@ -9,7 +9,7 @@ import model.{Handle, Tweet}
 
 import scala.concurrent.duration._
 
-object Example2 {
+object FreeApplicativeExample {
 
   def findMostInfluentialAccount(handle1: Handle, handle2: Handle): AppActionMonadic[Handle] = {
     val handle1ActiveFollowers = getFollowersA(handle1).map(getUsersActiveTweetCount)
@@ -23,7 +23,8 @@ object Example2 {
       } yield mostActive
     }
 
-    val applicativeResult = Apply[AppActionApplicative].map2(handle1ActiveFollowers, handle2ActiveFollowers)(determineMostActive)
+    val applicativeResult = Apply[AppActionApplicative]
+      .map2(handle1ActiveFollowers, handle2ActiveFollowers)(determineMostActive)
 
     // equivalent (but intellij reports as an error)
     //    val applicativeResult: AppActionApplicative[AppActionMonadic[Handle]] =

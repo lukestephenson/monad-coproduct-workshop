@@ -44,7 +44,7 @@ object Main {
   def findMostInfluentialAccount(): AppActionMonadic[String] = {
     for {
       baseUrl <- noAction("http://baseurl")
-      mostActive <- Example2.findMostInfluentialAccount(lukeHandle, composeHandle)
+      mostActive <- FreeApplicativeExample.findMostInfluentialAccount(lukeHandle, composeHandle)
     } yield s"$baseUrl/details/$mostActive"
   }
 
