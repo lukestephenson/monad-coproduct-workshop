@@ -13,8 +13,6 @@ import model.{Handle, Tweet}
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-
-
 /**
   * Given two Twitter accounts, determine which one has the most followers
   * who have tweeted in the last week.  Then return a url in the form
@@ -28,8 +26,14 @@ object Main {
   val composeHandle = Handle("compose")
 
   def main(args: Array[String]): Unit = timed {
-    val program = findMostInfluentialAccount()
-    val task = TaskInterpreter.run(program)
+    val solution = if (args.length == 1) args(0) else "monad"
+
+    val program = solution match {
+      case "applicative" => FreeApplicativeExample.findMostInfluentialAccount(lukeHandle, composeHandle)
+      case "monad" => FreeMonadExample.findMostInfluentialAccount(lukeHandle, composeHandle)
+    }
+
+    val task = TaskInterpreter.run(findMostInfluentialAccount(program))
     println(Await.result(task.runAsync, 1.minute))
   }
 
@@ -41,10 +45,10 @@ object Main {
     println(s"Took $total ms to complete")
   }
 
-  def findMostInfluentialAccount(): AppActionMonadic[String] = {
+  def findMostInfluentialAccount(program: AppActionMonadic[Handle]): AppActionMonadic[String] = {
     for {
       baseUrl <- noAction("http://baseurl")
-      mostActive <- FreeApplicativeExample.findMostInfluentialAccount(lukeHandle, composeHandle)
+      mostActive <- program
     } yield s"$baseUrl/details/$mostActive"
   }
 
