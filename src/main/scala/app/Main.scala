@@ -1,14 +1,8 @@
 package app
 
-import cats.free.Free
-import cats.free.FreeApplicative.FA
-import cats.std.vector._
-import cats.syntax.cartesian._
-import cats.syntax.traverse._
-import demo.Effects.S._
-import demo.Effects.{AppActionApplicative, AppActionMonadic, CP, noAction}
-import demo.{SocialNetworkAction, TaskInterpreter}
-import model.{Handle, Tweet}
+import demo.Effects.{AppActionMonadic, noAction}
+import demo.TaskInterpreter
+import model.Handle
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

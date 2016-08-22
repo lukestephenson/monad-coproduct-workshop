@@ -5,7 +5,8 @@ Running
 
 Command Line:
 ```
-sbt run
+./sbt "run monad"
+./sbt "run applicative"
 ```
 
 IDE:
