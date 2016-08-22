@@ -6,6 +6,8 @@ import model.{Handle, Tweet}
 import monix.cats._
 import monix.eval.Task
 
+import scala.concurrent.duration._
+
 abstract class AppInterpreter[F[_] : Monad] {
   def interpret: (AppAction ~> F)
 
@@ -20,8 +22,8 @@ object TaskInterpreter extends AppInterpreter[Task] {
 
 object SocialNetworkActionInterpreter extends (SocialNetworkAction ~> Task) {
   def apply[A](action: SocialNetworkAction[A]): Task[A] = action match {
-    case GetFollowers(handle) => Task.now(Vector(Handle("abc")))
-    case GetMostRecentTweet(handle) => Task.now(Tweet("hello world", System.currentTimeMillis()))
+    case GetFollowers(handle) => Task.now(Vector(Handle("abc"), Handle("xyz"), Handle("123"))).delayResult(1.second)
+    case GetMostRecentTweet(handle) => Task.now(Tweet("hello world", System.currentTimeMillis())).delayResult(1.second)
   }
 }
 

@@ -6,7 +6,7 @@ scalaVersion := "2.11.8"
 
 val catsVersion = "0.6.1"
 
-val monixVersion = "2.0-RC8"
+val monixVersion = "2.0-RC11"
 
 libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % catsVersion,
