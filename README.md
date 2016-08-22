@@ -5,8 +5,8 @@ Running
 
 Command Line:
 ```
-./sbt "run monad"
-./sbt "run applicative"
+sbt "run monad"
+sbt "run applicative"
 ```
 
 IDE:
@@ -27,6 +27,17 @@ Note that some of the valid code in this solution will be highlighted
 by intellij as having structural issues.  Especially around the case 
 statement in the interpreter. 
 https://youtrack.jetbrains.com/issue/SCL-3170
+
+Intellij also gets confused by the `|@|` operator when combining 
+applicatives.  Any alternative is to use `Apply[M].map2(a, b)(handleBoth)` 
+
+# Monix Notes
+The problem makes use of Monix tasks as an abstraction over Scala Future.
+Monix has been used as it cleanly separates the intention of asynchronous
+execution from the actual execution.  A Scala Future does not provide
+this level of flexibility. 
+
+See https://monix.io/docs/2x/eval/task.html.
 
 ## 1. Single ADT
 We have defined a single top level ADT which becomes bloated with all 
@@ -63,3 +74,6 @@ under the heading *Composing Free monads ADTs.*
 For problem 2, see http://typelevel.org/cats/tut/freeapplicative.html.  
 Note that you will still need monadic composition as well (to fetch the
 most recent tweet for each follower).
+
+For this problem, there is a branch `free-applicative` to use as a 
+starting point.
