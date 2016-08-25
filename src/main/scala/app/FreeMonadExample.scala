@@ -30,6 +30,4 @@ object FreeMonadExample {
     followerMostRecentTweets.count { tweet =>
       tweet.timestamp > System.currentTimeMillis() - 7.days.toMillis
     }
-
 }
-
