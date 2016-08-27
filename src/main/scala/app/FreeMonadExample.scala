@@ -1,6 +1,6 @@
 package app
 
-import cats.std.vector._
+import cats.instances.vector._
 import cats.syntax.traverse._
 import demo.Effects.AppActionMonadic
 import demo.Effects.S._

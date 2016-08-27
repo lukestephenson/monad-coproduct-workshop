@@ -1,7 +1,7 @@
 package app
 
 import cats.Apply
-import cats.std.vector._
+import cats.instances.vector._
 import cats.syntax.traverse._
 import demo.Effects.S._
 import demo.Effects.{AppActionApplicative, AppActionMonadic, noAction}
