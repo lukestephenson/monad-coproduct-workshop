@@ -8,16 +8,13 @@ import monix.eval.Task
 
 import scala.concurrent.duration._
 
-abstract class AppInterpreter[F[_] : Monad] {
-  def interpret: (AppAction ~> F)
-
-  def run[A](script: AppActionMonadic[A]): F[A] = script.foldMap(interpret)
-}
-
-object TaskInterpreter extends AppInterpreter[Task] {
+object TaskInterpreter {
   implicitly[Monad[Task]]
 
   val interpret: AppAction ~> Task = SocialNetworkActionInterpreter or ConfigActionInterpreter
+
+  def run[A](script: AppActionMonadic[A]): Task[A] = script.foldMap(interpret)
+
 }
 
 object SocialNetworkActionInterpreter extends (SocialNetworkAction ~> Task) {
