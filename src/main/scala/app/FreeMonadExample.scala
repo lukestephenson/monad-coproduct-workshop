@@ -1,6 +1,6 @@
 package app
 
-import cats.std.vector._
+import cats.instances.vector._
 import cats.syntax.traverse._
 import demo.AppAction.AppActionMonadic
 import demo.SocialNetworkAction._

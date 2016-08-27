@@ -8,7 +8,6 @@ import monix.eval.Task
 
 import scala.concurrent.duration._
 
-
 class TaskInterpreter(socialNetworkActionInterpreter: SocialNetworkActionInterpreter,
                       configActionInterpreter: ConfigActionInterpreter)
   extends (AppAction ~> Task)  {
