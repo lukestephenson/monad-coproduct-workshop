@@ -28,7 +28,9 @@ object AppActionApplicativeInterpreter extends (AppActionApplicative ~> Task) {
 
 object SocialNetworkActionInterpreter extends (SocialNetworkAction ~> Task) {
   def apply[A](action: SocialNetworkAction[A]): Task[A] = action match {
-    case GetFollowers(handle) => Task.now(Vector(Handle("abc"), Handle("xyz"), Handle("123"))).delayResult(1.second)
-    case GetMostRecentTweet(handle) => Task.now(Tweet("hello world", System.currentTimeMillis())).delayResult(1.second)
+    case GetFollowers(handle) =>
+      Task.now(Vector(Handle("abc"), Handle("xyz"), Handle("123"))).delayResult(1.second)
+    case GetMostRecentTweet(handle) =>
+      Task.now(Tweet("hello world", System.currentTimeMillis())).delayResult(1.second)
   }
 }
