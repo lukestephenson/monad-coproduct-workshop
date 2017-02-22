@@ -4,6 +4,7 @@ import cats.instances.vector._
 import cats.syntax.traverse._
 import demo.Effects.AppActionMonadic
 import demo.Effects.S._
+import demo.Effects.Sys._
 import model.{Handle, Tweet}
 
 import scala.concurrent.duration._
@@ -12,6 +13,8 @@ object FreeMonadExample {
 
   def findMostInfluentialAccount(handle1: Handle, handle2: Handle): AppActionMonadic[Handle] = {
     for {
+      time <- getTime
+      _ = println(s"Time is $time")
       handle1Followers <- getFollowers(handle1)
       handle2Followers <- getFollowers(handle2)
       handle1ActiveFollowers <- getUsersActiveTweetCount(handle1Followers)

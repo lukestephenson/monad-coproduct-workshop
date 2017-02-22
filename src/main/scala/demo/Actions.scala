@@ -9,10 +9,12 @@ case class GetFollowers(handle: Handle) extends SocialNetworkAction[Vector[Handl
 case class GetMostRecentTweet(handle: Handle) extends SocialNetworkAction[Tweet]
 
 object Effects {
-  type AppAction[A] = Coproduct[SocialNetworkAction, ConfigAction, A]
+  type Cp1[A] = Coproduct[SocialNetworkAction, ConfigAction, A]
+  type AppAction[A] = Coproduct[SystemAction, Cp1, A]
   type AppActionMonadic[A] = Free[AppAction, A]
 
   val S = implicitly[SocialNetworkActions[AppAction]]
+  val Sys = implicitly[SystemActions[AppAction]]
   val C = implicitly[ConfigActions[AppAction]]
 }
 
@@ -39,4 +41,14 @@ object ConfigActions {
   implicit def configActions[F[_]](implicit I: Inject[ConfigAction, F]): ConfigActions[F] = new ConfigActions[F]()
 }
 
+sealed trait SystemAction[A]
+case object GetTime extends SystemAction[Long]
 
+class SystemActions[F[_]](implicit I: Inject[SystemAction, F]) {
+  def getTime(): Free[F, Long] =
+    Free.inject[SystemAction, F](GetTime)
+}
+
+object SystemActions {
+  implicit def systemActions[F[_]](implicit I: Inject[SystemAction, F]): SystemActions[F] = new SystemActions[F]()
+}
